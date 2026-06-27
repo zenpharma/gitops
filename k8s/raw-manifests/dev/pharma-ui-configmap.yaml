@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pharma-ui
+  namespace: dev
+data:
+  API_BASE_URL: "/api"
+  AUTH_BASE_URL: "/api/auth"
+  ENV: "dev"

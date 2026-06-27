@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pharma-ui
+  namespace: dev
+  labels:
+    app: pharma-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pharma-ui
+  template:
+    metadata:
+      labels:
+        app: pharma-ui
+    spec:
+      serviceAccountName: pharma-ui
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: pharma-ui
+          image: 873135413040.dkr.ecr.us-east-1.amazonaws.com/pharma-ui:sha-0d828ec
+          securityContext:
+            readOnlyRootFilesystem: true
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: nginx-cache
+              mountPath: /var/cache/nginx
+            - name: nginx-run
+              mountPath: /var/run
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: nginx-cache
+          emptyDir: {}
+        - name: nginx-run
+          emptyDir: {}
