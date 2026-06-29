@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+  labels:
+    managed-by: terraform
+    app.kubernetes.io/name: argocd
