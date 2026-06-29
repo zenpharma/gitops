@@ -1,0 +1,14 @@
+apiVersion: v2
+name: pharma-service
+description: Common Helm chart for Pharma microservices
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - pharma
+  - microservice
+  - java
+  - spring-boot
+maintainers:
+  - name: Pharma DevOps Team
+    email: devops@pharma.com
