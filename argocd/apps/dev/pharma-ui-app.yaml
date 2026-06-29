@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pharma-ui-dev
+  namespace: argocd
+  labels:
+    env: dev
+    app: pharma-ui
+    managed-by: terraform
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: pharma
+
+  source:
+    # Replace 'ravdy' with your GitHub username after forking zen-gitops
+    repoURL: https://github.com/<your-username>/gitops.git
+    targetRevision: HEAD
+    path: helm-charts
+    helm:
+      valueFiles:
+        - ../envs/dev/values-pharma-ui.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dev
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+  revisionHistoryLimit: 10
