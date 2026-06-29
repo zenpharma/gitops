@@ -1,0 +1,65 @@
+replicaCount: 1
+fullnameOverride: auth-service
+image:
+  repository: 873135413040.dkr.ecr.us-east-1.amazonaws.com/auth-service
+  tag: sha-690b5ca
+  pullPolicy: Always
+service:
+  type: ClusterIP
+  port: 8081
+  targetPort: 8081
+ingress:
+  enabled: false
+  className: alb
+  host: dev.pharma.internal
+  path: /auth
+  pathType: Prefix
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+livenessProbe:
+  path: /actuator/health
+  port: 8081
+  initialDelaySeconds: 60
+  periodSeconds: 15
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+readinessProbe:
+  path: /actuator/health/readiness
+  port: 8081
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+configmap:
+  SPRING_PROFILES_ACTIVE: dev
+  LOG_LEVEL: DEBUG
+  SERVER_PORT: "8081"
+  TOKEN_EXPIRATION_MS: "86400000"
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics,prometheus"
+envFrom:
+  - secretRef:
+      name: db-credentials
+  - secretRef:
+      name: jwt-secret
+volumeMounts:
+  - name: tmp
+    mountPath: /tmp
+volumes:
+  - name: tmp
+    emptyDir: {}
+serviceAccount:
+  create: true
+  annotations: {}
+  name: auth-service

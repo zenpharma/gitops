@@ -1,0 +1,58 @@
+replicaCount: 1
+fullnameOverride: notification-service
+image:
+  repository: 873135413040.dkr.ecr.us-east-1.amazonaws.com/notification-service
+  tag: sha-c39ad23
+  pullPolicy: Always
+service:
+  type: ClusterIP
+  port: 3000
+  targetPort: 3000
+ingress:
+  enabled: false
+  className: alb
+  host: dev.pharma.internal
+  path: /notifications
+  pathType: Prefix
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+livenessProbe:
+  path: /actuator/health
+  port: 3000
+  initialDelaySeconds: 20
+  periodSeconds: 15
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+readinessProbe:
+  path: /actuator/health/readiness
+  port: 3000
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+configmap:
+  NODE_ENV: development
+  PORT: "3000"
+  LOG_LEVEL: debug
+  SMTP_HOST: "smtp.example.com"
+  SMTP_PORT: "587"
+  EMAIL_FROM: "noreply-dev@example.com"
+envFrom:
+  - secretRef:
+      name: db-credentials
+serviceAccount:
+  create: true
+  annotations: {}
+  name: notification-service

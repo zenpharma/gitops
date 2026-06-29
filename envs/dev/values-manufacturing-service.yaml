@@ -1,0 +1,62 @@
+replicaCount: 1
+fullnameOverride: manufacturing-service
+image:
+  repository: 873135413040.dkr.ecr.us-east-1.amazonaws.com/manufacturing-service
+  tag: sha-c39ad23
+  pullPolicy: Always
+service:
+  type: ClusterIP
+  port: 8085
+  targetPort: 8085
+ingress:
+  enabled: false
+  className: alb
+  host: dev.pharma.internal
+  path: /manufacturing
+  pathType: Prefix
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+livenessProbe:
+  path: /actuator/health
+  port: 8085
+  initialDelaySeconds: 90
+  periodSeconds: 15
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+readinessProbe:
+  path: /actuator/health/readiness
+  port: 8085
+  initialDelaySeconds: 45
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+configmap:
+  SPRING_PROFILES_ACTIVE: dev
+  LOG_LEVEL: DEBUG
+  SERVER_PORT: "8085"
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics,prometheus"
+envFrom:
+  - secretRef:
+      name: db-credentials
+volumeMounts:
+  - name: tmp
+    mountPath: /tmp
+volumes:
+  - name: tmp
+    emptyDir: {}
+serviceAccount:
+  create: true
+  annotations: {}
+  name: manufacturing-service
